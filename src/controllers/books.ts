@@ -1,6 +1,7 @@
+import type { Request, Response } from 'express';
 import pool from '../db.js';
 
-export const getAllBooks = async (req, res) => {
+export const getAllBooks = async (req: Request, res: Response) => {
   try {
     const result = await pool.query('SELECT * FROM books ORDER BY created_at DESC');
     res.json(result.rows);
@@ -10,7 +11,7 @@ export const getAllBooks = async (req, res) => {
   }
 };
 
-export const getBookById = async (req, res) => {
+export const getBookById = async (req: Request, res: Response) => {
   const { id } = req.params;
   try {
     const result = await pool.query('SELECT * FROM books WHERE id=$1', [id]);
@@ -24,7 +25,7 @@ export const getBookById = async (req, res) => {
   }
 };
 
-export const createBook = async (req, res) => {
+export const createBook = async (req: Request, res: Response) => {
   const { title, author, isbn, quantity } = req.body;
 
   try {
@@ -41,7 +42,7 @@ export const createBook = async (req, res) => {
   }
 };
 
-export const updateBook = async (req, res) => {
+export const updateBook = async (req: Request, res: Response) => {
   const { id } = req.params;
   const { title, author, quantity } = req.body;
 
@@ -64,7 +65,7 @@ export const updateBook = async (req, res) => {
   }
 };
 
-export const deleteBook = async (req, res) => {
+export const deleteBook = async (req: Request, res: Response) => {
   const { id } = req.params;
   try {
     await pool.query('DELETE FROM books WHERE id=$1', [id]);

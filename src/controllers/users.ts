@@ -1,7 +1,8 @@
+import type { Request, Response } from 'express';
 import pool from '../db.js';
 import bcrypt from 'bcrypt';
 
-export const getAllUsers = async (req, res) => {
+export const getAllUsers = async (req: Request, res: Response) => {
   try {
     const result = await pool.query('SELECT id, username, role FROM users');
     res.json(result.rows);
@@ -11,7 +12,7 @@ export const getAllUsers = async (req, res) => {
   }
 };
 
-export const createUser = async (req, res) => {
+export const createUser = async (req: Request, res: Response) => {
   const { username, password, role = "member" } = req.body;
   const currentUserRole = req.user.role;
 
@@ -32,7 +33,7 @@ export const createUser = async (req, res) => {
   }
 };
 
-export const updateUserRole = async (req, res) => {
+export const updateUserRole = async (req: Request, res: Response) => {
   const { id } = req.params;
   const { role } = req.body;
   const currentUserRole = req.user.role;
@@ -53,7 +54,7 @@ export const updateUserRole = async (req, res) => {
   }
 };
 
-export const deleteUser = async (req, res) => {
+export const deleteUser = async (req: Request, res: Response) => {
   const { id } = req.params;
   try {
     await pool.query('DELETE FROM users WHERE id=$1', [id]);

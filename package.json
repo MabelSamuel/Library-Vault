@@ -1,23 +1,46 @@
 {
-  "name": "rbac",
+  "name": "library-vault",
   "version": "1.0.0",
-  "description": "An authentication and authorization backend implementing JWT, RBAC, middleware-based route protection, and secure user access management.",
+  "description": "A robust backend API for a comprehensive library management system with role-based access control (RBAC). Features secure authentication with JWT, middleware-based route protection, and granular access management for four distinct user roles: Super Admin, Admin, Librarian, and Member. Built for scalable library operations with secure data handling and role-specific functionalities.",
+  "keywords": [
+    "library-management",
+    "rbac",
+    "jwt-authentication",
+    "nodejs-backend",
+    "authorization",
+    "library-system",
+    "express",
+    "mongodb",
+    "access-control",
+    "library-api"
+  ],
   "license": "ISC",
   "author": "Mabel Samuel",
   "type": "module",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "dev": "nodemon index.js"
+    "start": "npx tsc && node dist/index.js",
+    "build": "tsc",
+    "dev": "nodemon src/index.ts"
   },
   "dependencies": {
     "bcrypt": "^6.0.0",
+    "cors": "^2.8.5",
     "dotenv": "^17.2.3",
     "express": "^5.2.1",
     "jsonwebtoken": "^9.0.3",
     "pg": "^8.16.3"
   },
   "devDependencies": {
-    "nodemon": "^3.1.11"
+    "@types/bcrypt": "^6.0.0",
+    "@types/cors": "^2.8.19",
+    "@types/dotenv": "^6.1.1",
+    "@types/express": "^5.0.6",
+    "@types/jsonwebtoken": "^9.0.10",
+    "@types/pg": "^8.16.0",
+    "nodemon": "^3.1.11",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.9.3"
   }
 }
