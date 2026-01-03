@@ -1,7 +1,8 @@
 import type { Request, Response } from 'express';
-import pool from '../db.js';
+import pool from '../db';
+import { AuthenticatedRequest } from '../types/auth';
 
-export const borrowBook = async (req: Request, res: Response) => {
+export const borrowBook = async (req: AuthenticatedRequest, res: Response) => {
   const userId = req.user.id;
   const { book_id } = req.body;
 
@@ -69,7 +70,7 @@ export const returnBook = async (req: Request, res: Response) => {
   }
 };
 
-export const getMyTransactions = async (req: Request, res: Response) => {
+export const getMyTransactions = async (req: AuthenticatedRequest, res: Response) => {
   try {
     const result = await pool.query(
       'SELECT * FROM transactions WHERE user_id=$1 ORDER BY created_at DESC',

@@ -1,11 +1,11 @@
 import express from 'express';
 import type { Request, Response } from 'express';
 import dotenv from "dotenv";
-import pool from './src/db';
-import authRoutes from './src/routes/auth';
-import userRoutes from "./src/routes/users";
-import bookRoutes from "./src/routes/books";
-import transactionRoutes from "./src/routes/transactions";
+import pool from '../src/db';
+import authRoutes from './routes/auth.route';
+import userRoutes from "./routes/user.route";
+import bookRoutes from "./routes/book.route";
+import transactionRoutes from "./routes/transaction.route";
 
 dotenv.config();
 
@@ -13,6 +13,7 @@ const app = express()
 const port = process.env.PORT
 
 app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 
 app.use('/api/v1/auth', authRoutes);
 app.use('/api/v1/users', userRoutes);

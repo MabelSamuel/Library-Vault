@@ -1,6 +1,7 @@
 import type { Request, Response } from 'express';
-import pool from '../db.js';
+import pool from '../db';
 import bcrypt from 'bcrypt';
+import type { AuthenticatedRequest } from '../types/auth';
 
 export const getAllUsers = async (req: Request, res: Response) => {
   try {
@@ -12,8 +13,12 @@ export const getAllUsers = async (req: Request, res: Response) => {
   }
 };
 
-export const createUser = async (req: Request, res: Response) => {
-  const { username, password, role = "member" } = req.body;
+export const createUser = async (req: AuthenticatedRequest, res: Response) => {
+  const { username, password, role = "member" } = req.body as unknown as {
+    username: string;
+    password: string;
+    role: "member" | "admin" | "super_admin";
+  };
   const currentUserRole = req.user.role;
 
   if (role === 'super_admin' && currentUserRole !== 'super_admin') {
@@ -33,9 +38,11 @@ export const createUser = async (req: Request, res: Response) => {
   }
 };
 
-export const updateUserRole = async (req: Request, res: Response) => {
-  const { id } = req.params;
-  const { role } = req.body;
+export const updateUserRole = async (req: AuthenticatedRequest, res: Response) => {
+  const { id } = req.params as unknown as { id: string };
+  const { role } = req.body  as unknown as {
+    role: "member" | "admin" | "super_admin";
+  };
   const currentUserRole = req.user.role;
 
   if (role === 'super_admin' && currentUserRole !== 'super_admin') {

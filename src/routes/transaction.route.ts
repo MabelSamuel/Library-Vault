@@ -1,17 +1,18 @@
 import express from "express";
-import { protect, authorize } from "../middlewares/auth.js";
+import { protect, authorize } from "../middlewares/auth";
 import {
   borrowBook,
   returnBook,
   getMyTransactions,
   getAllTransactions,
-} from "../controllers/transactions.js";
+} from "../controllers/transaction.controller";
+import { requireAuth } from "../utils/requireAuth";
 
 const router = express.Router();
 
-router.post("/borrow", protect, authorize({ roles: ["member"] }), borrowBook);
+router.post("/borrow", protect, authorize({ roles: ["member"] }), requireAuth(borrowBook));
 router.post("/return", protect, authorize({ roles: ["member"] }), returnBook);
-router.get("/me", protect, getMyTransactions);
+router.get("/me", protect, requireAuth(getMyTransactions));
 router.get(
   "/",
   protect,

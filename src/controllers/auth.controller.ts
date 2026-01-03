@@ -1,9 +1,9 @@
-import pool from "../db.js";
+import pool from "../db";
 import bcrypt from "bcrypt";
 import { generateAccessToken, generateRefreshToken } from "../utils/jwt";
 import type { Request, Response } from "express";
 import jwt from "jsonwebtoken";
-import { RefreshTokenPayload } from "../types/auth.js";
+import { AuthenticatedRequest, RefreshTokenPayload } from "../types/auth.js";
 
 export const registerUser = async (req: Request, res: Response) => {
   const { username, password, role } = req.body;
@@ -79,7 +79,7 @@ export const refreshToken = async (req: Request, res: Response) => {
   }
 };
 
-export const logout = async (req: Request, res: Response) => {
+export const logout = async (req: AuthenticatedRequest, res: Response) => {
   await pool.query(
     'UPDATE users SET token_version = token_version + 1 WHERE id=$1',
     [req.user.id]

@@ -16,13 +16,12 @@
   ],
   "license": "ISC",
   "author": "Mabel Samuel",
-  "type": "module",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "npx tsc && node dist/index.js",
     "build": "tsc",
-    "dev": "nodemon src/index.ts"
+    "dev": "nodemon"
   },
   "dependencies": {
     "bcrypt": "^6.0.0",

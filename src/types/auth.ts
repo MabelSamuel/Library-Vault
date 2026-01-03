@@ -1,3 +1,4 @@
+import type { Request } from "express"
 export interface JwtUserPayload {
   id: string
   role: Role
@@ -14,4 +15,8 @@ export interface RefreshTokenPayload {
   tokenVersion: number
   iat?: number
   exp?: number
+}
+
+export interface AuthenticatedRequest extends Request {
+  user: JwtUserPayload;
 }

@@ -1,7 +1,7 @@
 import jwt from "jsonwebtoken";
 import dotenv from "dotenv";
 import type { Request, Response, NextFunction } from "express";
-import { Role } from "../types/auth";
+import { JwtUserPayload, Role } from "../types/auth";
 dotenv.config();
 
 const ROLE_LEVELS: Record<Role, number> = {
@@ -18,7 +18,7 @@ export const protect = (req: Request, res: Response, next: NextFunction) => {
 
   const token = authHeader.split(" ")[1];
   try {
-    const decoded = jwt.verify(token, process.env.JWT_SECRET!);
+    const decoded = jwt.verify(token, process.env.JWT_SECRET!) as JwtUserPayload;
     req.user = decoded;
     next();
   } catch (err) {
@@ -30,6 +30,9 @@ export const authorize =
   (options: { roles?: Role[]; minRole?: Role }) =>
   (req: Request, res: Response, next: NextFunction) => {
     const { roles = [], minRole } = options;
+    if (!req.user) {
+      return res.status(401).json({ message: "Not authenticated" });
+    }
     const userRole: Role = req.user.role;
 
     if (roles.length && roles.includes(userRole)) return next();
