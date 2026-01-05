@@ -8,7 +8,7 @@ export const borrowBook = async (req: AuthenticatedRequest, res: Response) => {
 
   try {
     const book = await pool.query(
-      'SELECT quantity FROM books WHERE id=$1',
+      'SELECT quantity FROM book WHERE id=$1',
       [book_id]
     );
 
@@ -18,13 +18,13 @@ export const borrowBook = async (req: AuthenticatedRequest, res: Response) => {
     await pool.query('BEGIN');
 
     await pool.query(
-      `INSERT INTO transactions(user_id, book_id, status)
+      `INSERT INTO book_transaction(user_id, book_id, status)
        VALUES($1, $2, 'borrowed')`,
       [userId, book_id]
     );
 
     await pool.query(
-      'UPDATE books SET quantity = quantity - 1 WHERE id=$1',
+      'UPDATE book SET quantity = quantity - 1 WHERE id=$1',
       [book_id]
     );
 
@@ -44,7 +44,7 @@ export const returnBook = async (req: Request, res: Response) => {
     await pool.query('BEGIN');
 
     const trx = await pool.query(
-      `UPDATE transactions
+      `UPDATE book_transaction
        SET status='returned', returned_at=NOW()
        WHERE id=$1 AND status='borrowed'
        RETURNING book_id`,
@@ -57,7 +57,7 @@ export const returnBook = async (req: Request, res: Response) => {
     }
 
     await pool.query(
-      'UPDATE books SET quantity = quantity + 1 WHERE id=$1',
+      'UPDATE book SET quantity = quantity + 1 WHERE id=$1',
       [trx.rows[0].book_id]
     );
 
@@ -73,7 +73,7 @@ export const returnBook = async (req: Request, res: Response) => {
 export const getMyTransactions = async (req: AuthenticatedRequest, res: Response) => {
   try {
     const result = await pool.query(
-      'SELECT * FROM transactions WHERE user_id=$1 ORDER BY created_at DESC',
+      'SELECT * FROM book_transaction WHERE user_id=$1 ORDER BY created_at DESC',
       [req.user.id]
     );
     res.json(result.rows);
@@ -87,9 +87,9 @@ export const getAllTransactions = async (req: Request, res: Response) => {
   try {
     const result = await pool.query(
       `SELECT t.*, u.username, b.title
-       FROM transactions t
-       JOIN users u ON u.id = t.user_id
-       JOIN books b ON b.id = t.book_id
+       FROM book_transaction t
+       JOIN lib_user u ON u.id = t.user_id
+       JOIN book b ON b.id = t.book_id
        ORDER BY t.created_at DESC`
     );
     res.json(result.rows);

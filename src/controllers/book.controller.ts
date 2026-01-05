@@ -3,7 +3,7 @@ import pool from '../db';
 
 export const getAllBooks = async (req: Request, res: Response) => {
   try {
-    const result = await pool.query('SELECT * FROM books ORDER BY created_at DESC');
+    const result = await pool.query('SELECT * FROM book ORDER BY created_at DESC');
     res.json(result.rows);
   } catch (err) {
     console.error(err);
@@ -14,7 +14,7 @@ export const getAllBooks = async (req: Request, res: Response) => {
 export const getBookById = async (req: Request, res: Response) => {
   const { id } = req.params;
   try {
-    const result = await pool.query('SELECT * FROM books WHERE id=$1', [id]);
+    const result = await pool.query('SELECT * FROM book WHERE id=$1', [id]);
     if (!result.rows.length)
       return res.status(404).json({ message: 'Book not found' });
 
@@ -30,7 +30,7 @@ export const createBook = async (req: Request, res: Response) => {
 
   try {
     const result = await pool.query(
-      `INSERT INTO books(title, author, isbn, quantity)
+      `INSERT INTO book(title, author, isbn, quantity)
        VALUES($1, $2, $3, $4)
        RETURNING *`,
       [title, author, isbn, quantity]
@@ -48,7 +48,7 @@ export const updateBook = async (req: Request, res: Response) => {
 
   try {
     const result = await pool.query(
-      `UPDATE books
+      `UPDATE book
        SET title=$1, author=$2, quantity=$3
        WHERE id=$4
        RETURNING *`,
@@ -68,7 +68,7 @@ export const updateBook = async (req: Request, res: Response) => {
 export const deleteBook = async (req: Request, res: Response) => {
   const { id } = req.params;
   try {
-    await pool.query('DELETE FROM books WHERE id=$1', [id]);
+    await pool.query('DELETE FROM book WHERE id=$1', [id]);
     res.json({ message: 'Book deleted successfully' });
   } catch (err) {
     console.error(err);

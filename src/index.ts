@@ -16,9 +16,9 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 app.use('/api/v1/auth', authRoutes);
-app.use('/api/v1/users', userRoutes);
-app.use('/api/v1/books', bookRoutes);
-app.use('/api/v1/transactions', transactionRoutes);
+app.use('/api/v1/user', userRoutes);
+app.use('/api/v1/book', bookRoutes);
+app.use('/api/v1/transaction', transactionRoutes);
 
 app.get('/', (req: Request, res: Response) => {
   res.send('RBAC for Library!')

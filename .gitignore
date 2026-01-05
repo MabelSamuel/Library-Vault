@@ -45,4 +45,4 @@ Thumbs.db
 # Coverage reports
 coverage/
 .nyc_output/
-db/seeds/users.seed.sql
+src/db/seeds/users.seed.sql
