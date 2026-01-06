@@ -35,7 +35,7 @@ export const registerUser = async (req: Request, res: Response) => {
     });
     await sendTestEmail(
       email,
-      "Verify Your Email for LibraryVault",
+      "Verify Your Email for Library Vault",
       html
     );
 
