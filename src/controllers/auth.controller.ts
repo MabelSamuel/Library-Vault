@@ -69,7 +69,10 @@ export const verifyEmail = async (req: Request, res: Response) => {
       "UPDATE lib_user SET is_email_verified = TRUE WHERE id = $1",
       [decoded.userId]
     );
-    res.send("Email verified! You can now log in.");
+    res.status(200).json({
+      message: "Email verified! You can now log in."
+    });
+
   } catch (err) {
     res.status(400).send("Invalid or expired token");
   }
