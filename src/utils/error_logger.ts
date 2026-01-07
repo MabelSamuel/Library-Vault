@@ -18,7 +18,7 @@ const transport = new winston.transports.DailyRotateFile({
 
 const logger = winston.createLogger({
   level: "error",
-  format: winston.format.combine(
+  format: combine(
     timestamp(),
     errors({ stack: true }),
     logFormat
