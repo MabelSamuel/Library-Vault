@@ -7,6 +7,7 @@ import crypto from "crypto";
 import { AuthenticatedRequest, RefreshTokenPayload } from "../types/auth.js";
 import { sendTestEmail } from "../utils/mailer";
 import { renderTemplate } from "../emails/render-template";
+import logger from "../utils/error_logger";
 
 export const registerUser = async (req: Request, res: Response) => {
   const { username, email, password } = req.body;
@@ -33,11 +34,7 @@ export const registerUser = async (req: Request, res: Response) => {
       username: username || "User",
       link: verificationLink,
     });
-    await sendTestEmail(
-      email,
-      "Verify Your Email for Library Vault",
-      html
-    );
+    await sendTestEmail(email, "Verify Your Email for Library Vault", html);
 
     res.status(201).json({
       message: "User registered, please verify your email",
@@ -50,7 +47,10 @@ export const registerUser = async (req: Request, res: Response) => {
     });
   } catch (err) {
     if (err instanceof Error) {
-      console.error(err.message);
+      logger.error({
+        message: err.message,
+        stack: err.stack,
+      });
     }
     res.status(500).send("Server error");
   }
@@ -70,10 +70,15 @@ export const verifyEmail = async (req: Request, res: Response) => {
       [decoded.userId]
     );
     res.status(200).json({
-      message: "Email verified! You can now log in."
+      message: "Email verified! You can now log in.",
     });
-
   } catch (err) {
+    if (err instanceof Error) {
+      logger.error({
+        message: err.message,
+        stack: err.stack,
+      });
+    }
     res.status(400).send("Invalid or expired token");
   }
 };
@@ -108,7 +113,10 @@ export const loginUser = async (req: Request, res: Response) => {
     res.json({ token });
   } catch (err) {
     if (err instanceof Error) {
-      console.error(err.message);
+      logger.error({
+        message: err.message,
+        stack: err.stack,
+      });
     }
     res.status(500).send("Server error");
   }
@@ -117,54 +125,70 @@ export const loginUser = async (req: Request, res: Response) => {
 export const requestPasswordReset = async (req: Request, res: Response) => {
   const { email } = req.body;
   if (!email) return res.status(400).send("Email required");
+  try {
+    const result = await pool.query("SELECT * FROM lib_user WHERE email=$1", [
+      email,
+    ]);
+    const user = result.rows[0];
+    if (!user) return res.status(400).send("No user with this email");
 
-  const result = await pool.query("SELECT * FROM lib_user WHERE email=$1", [
-    email,
-  ]);
-  const user = result.rows[0];
-  if (!user) return res.status(400).send("No user with this email");
+    const token = crypto.randomBytes(32).toString("hex");
+    const expires = new Date(Date.now() + 3600 * 1000);
 
-  const token = crypto.randomBytes(32).toString("hex");
-  const expires = new Date(Date.now() + 3600 * 1000);
+    await pool.query(
+      "UPDATE lib_user SET password_reset_token=$1, password_reset_expires=$2 WHERE id=$3",
+      [token, expires, user.id]
+    );
 
-  await pool.query(
-    "UPDATE lib_user SET password_reset_token=$1, password_reset_expires=$2 WHERE id=$3",
-    [token, expires, user.id]
-  );
+    const resetLink = `${process.env.FRONTEND_URL}/reset-password?token=${token}`;
+    const html = renderTemplate("password-reset", {
+      username: user.username || "User",
+      link: resetLink,
+    });
+    await sendTestEmail(email, "Reset Your LibraryVault Password", html);
 
-  const resetLink = `${process.env.FRONTEND_URL}/reset-password?token=${token}`;
-  const html = renderTemplate("password-reset", {
-    username: user.username || "User",
-    link: resetLink,
-  });
-  await sendTestEmail(
-    email,
-    "Reset Your LibraryVault Password",
-    html
-  );
-
-  res.json({ message: "Password reset link sent" });
+    res.json({ message: "Password reset link sent" });
+  } catch (err) {
+    if (err instanceof Error) {
+      console.error(err.message);
+      logger.error({
+        message: err.message,
+        stack: err.stack,
+      });
+    }
+    res.status(500).json({ message: "Server error" });
+  }
 };
 
 export const resetPassword = async (req: Request, res: Response) => {
   const { token, newPassword } = req.body;
   if (!token || !newPassword) return res.status(400).send("Invalid request");
+  try {
+    const result = await pool.query(
+      "SELECT * FROM lib_user WHERE password_reset_token=$1 AND password_reset_expires > NOW()",
+      [token]
+    );
 
-  const result = await pool.query(
-    "SELECT * FROM lib_user WHERE password_reset_token=$1 AND password_reset_expires > NOW()",
-    [token]
-  );
+    const user = result.rows[0];
+    if (!user) return res.status(400).send("Invalid or expired token");
 
-  const user = result.rows[0];
-  if (!user) return res.status(400).send("Invalid or expired token");
+    const hashed = await bcrypt.hash(newPassword, 10);
+    await pool.query(
+      "UPDATE lib_user SET password=$1, password_reset_token=NULL, password_reset_expires=NULL WHERE id=$2",
+      [hashed, user.id]
+    );
 
-  const hashed = await bcrypt.hash(newPassword, 10);
-  await pool.query(
-    "UPDATE lib_user SET password=$1, password_reset_token=NULL, password_reset_expires=NULL WHERE id=$2",
-    [hashed, user.id]
-  );
-
-  res.send("Password has been reset successfully");
+    res.send("Password has been reset successfully");
+  } catch (err) {
+    if (err instanceof Error) {
+      console.error(err.message);
+      logger.error({
+        message: err.message,
+        stack: err.stack,
+      });
+    }
+    res.status(500).json({ message: "Server error" });
+  }
 };
 
 export const refreshToken = async (req: Request, res: Response) => {
@@ -191,17 +215,35 @@ export const refreshToken = async (req: Request, res: Response) => {
 
     const accessToken = generateAccessToken(user);
     res.json({ accessToken });
-  } catch {
+  } catch (err) {
+    if (err instanceof Error) {
+      console.error(err.message);
+      logger.error({
+        message: err.message,
+        stack: err.stack,
+      });
+    }
     res.sendStatus(401);
   }
 };
 
 export const logout = async (req: AuthenticatedRequest, res: Response) => {
-  await pool.query(
-    "UPDATE lib_user SET token_version = token_version + 1 WHERE id=$1",
-    [req.user.id]
-  );
+  try {
+    await pool.query(
+      "UPDATE lib_user SET token_version = token_version + 1 WHERE id=$1",
+      [req.user.id]
+    );
 
-  res.clearCookie("refreshToken");
-  res.json({ message: "Logged out" });
+    res.clearCookie("refreshToken");
+    res.json({ message: "Logged out" });
+  } catch (err) {
+    if (err instanceof Error) {
+      console.error(err.message);
+      logger.error({
+        message: err.message,
+        stack: err.stack,
+      });
+    }
+    res.status(500).json({ message: "Server error" });
+  }
 };
