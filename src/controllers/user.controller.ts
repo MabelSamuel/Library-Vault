@@ -4,13 +4,20 @@ import bcrypt from 'bcrypt';
 import type { AuthenticatedRequest } from '../types/auth';
 import { sendTestEmail } from '../utils/mailer';
 import { renderTemplate } from '../emails/render-template';
+import logger from '../utils/error_logger';
 
 export const getAllUsers = async (req: Request, res: Response) => {
   try {
     const result = await pool.query('SELECT id, username, role FROM lib_user');
     res.json(result.rows);
   } catch (err) {
-    console.error(err);
+    if (err instanceof Error) {
+      console.error(err.message);
+      logger.error({
+        message: err.message,
+        stack: err.stack,
+      });
+    }
     res.status(500).send('Server error');
   }
 };
@@ -60,7 +67,13 @@ export const createUserByAdmin = async (
       .status(201)
       .json({ message: "User created successfully", user: result.rows[0] });
   } catch (err: any) {
-    console.error(err.message);
+    if (err instanceof Error) {
+      console.error(err.message);
+      logger.error({
+        message: err.message,
+        stack: err.stack,
+      });
+    }
     res.status(500).send("Server error");
   }
 };
@@ -87,7 +100,13 @@ export const updateUserRole = async (req: AuthenticatedRequest, res: Response) =
     );
     res.json(result.rows[0]);
   } catch (err) {
-    console.error(err);
+    if (err instanceof Error) {
+      console.error(err.message);
+      logger.error({
+        message: err.message,
+        stack: err.stack,
+      });
+    }
     res.status(500).send('Server error');
   }
 };
@@ -98,7 +117,13 @@ export const deleteUser = async (req: Request, res: Response) => {
     await pool.query('DELETE FROM lib_user WHERE id=$1', [id]);
     res.json({ message: 'User deleted successfully' });
   } catch (err) {
-    console.error(err);
+    if (err instanceof Error) {
+      console.error(err.message);
+      logger.error({
+        message: err.message,
+        stack: err.stack,
+      });
+    }
     res.status(500).send('Server error');
   }
 };
