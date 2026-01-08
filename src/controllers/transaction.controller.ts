@@ -1,6 +1,7 @@
 import type { Request, Response } from 'express';
 import pool from '../db';
 import { AuthenticatedRequest } from '../types/auth';
+import logger from '../utils/error_logger';
 
 export const borrowBook = async (req: AuthenticatedRequest, res: Response) => {
   const userId = req.user.id;
@@ -32,7 +33,13 @@ export const borrowBook = async (req: AuthenticatedRequest, res: Response) => {
     res.status(201).json({ message: 'Book borrowed successfully' });
   } catch (err) {
     await pool.query('ROLLBACK');
-    console.error(err);
+    if (err instanceof Error) {
+      console.error(err.message);
+      logger.error({
+        message: err.message,
+        stack: err.stack,
+      });
+    }
     res.status(500).json({ message: 'Server error' });
   }
 };
@@ -65,7 +72,13 @@ export const returnBook = async (req: Request, res: Response) => {
     res.json({ message: 'Book returned successfully' });
   } catch (err) {
     await pool.query('ROLLBACK');
-    console.error(err);
+    if (err instanceof Error) {
+      console.error(err.message);
+      logger.error({
+        message: err.message,
+        stack: err.stack,
+      });
+    }
     res.status(500).json({ message: 'Server error' });
   }
 };
@@ -78,7 +91,13 @@ export const getMyTransactions = async (req: AuthenticatedRequest, res: Response
     );
     res.json(result.rows);
   } catch (err) {
-    console.error(err);
+    if (err instanceof Error) {
+      console.error(err.message);
+      logger.error({
+        message: err.message,
+        stack: err.stack,
+      });
+    }
     res.status(500).json({ message: 'Server error' });
   }
 };
@@ -94,7 +113,13 @@ export const getAllTransactions = async (req: Request, res: Response) => {
     );
     res.json(result.rows);
   } catch (err) {
-    console.error(err);
+    if (err instanceof Error) {
+      console.error(err.message);
+      logger.error({
+        message: err.message,
+        stack: err.stack,
+      });
+    }
     res.status(500).json({ message: 'Server error' });
   }
 };
