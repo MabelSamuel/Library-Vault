@@ -4,6 +4,7 @@ import dotenv from "dotenv";
 import pool from '../src/db';
 import cors from "cors";
 import type { CorsOptions } from 'cors';
+import rateLimit from "express-rate-limit";
 import authRoutes from './routes/auth.route';
 import userRoutes from "./routes/user.route";
 import bookRoutes from "./routes/book.route";
@@ -34,12 +35,34 @@ const corsOptions: CorsOptions = {
   allowedHeaders: ["Content-Type", "Authorization"],
 };
 
+const apiLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 100,
+  message: {
+    success: false,
+    message: "Too many requests, please try again later."
+  },
+  standardHeaders: true,
+  legacyHeaders: false
+});
+
+const authLimiter = rateLimit({
+  windowMs: 10 * 60 * 1000, 
+  max: 5, 
+  message: {
+    success: false,
+    message: "Too many auth attempts. Try again later."
+  }
+});
+
 app.use(cors(corsOptions));
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-app.use('/api/v1/auth', authRoutes);
+app.use('/api', apiLimiter);
+
+app.use('/api/v1/auth', authLimiter, authRoutes);
 app.use('/api/v1/user', userRoutes);
 app.use('/api/v1/book', bookRoutes);
 app.use('/api/v1/transaction', transactionRoutes);
