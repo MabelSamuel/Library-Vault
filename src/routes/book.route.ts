@@ -7,10 +7,11 @@ import {
   updateBook,
   deleteBook,
 } from "../controllers/book.controller";
+import { cache } from "../middlewares/cache";
 
 const router = express.Router();
 
-router.get("/", protect, getAllBooks);
+router.get("/", protect, cache(120), getAllBooks);
 router.get("/:id", protect, getBookById);
 router.post(
   "/",

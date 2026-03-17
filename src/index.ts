@@ -1,31 +1,33 @@
-import express from 'express';
-import type { Request, Response } from 'express';
+import express from "express";
+import type { Request, Response } from "express";
 import dotenv from "dotenv";
-import pool from '../src/db';
+import pool from "../src/db";
 import cors from "cors";
-import type { CorsOptions } from 'cors';
-import rateLimit from "express-rate-limit";
-import authRoutes from './routes/auth.route';
+import type { CorsOptions } from "cors";
+import authRoutes from "./routes/auth.route";
 import userRoutes from "./routes/user.route";
 import bookRoutes from "./routes/book.route";
 import transactionRoutes from "./routes/transaction.route";
+import { connectRedis } from "./config/redis";
+import { redisAuthLimiter, redisRateLimiter } from "./middlewares/rateLimiter";
 
 dotenv.config();
 
-const app = express()
-const port = process.env.PORT
+const app = express();
+const port = process.env.PORT;
 
-const allowedOrigins = [process.env.FRONTEND_URL, process.env.DEV_URL].filter(Boolean) as string[];
+const allowedOrigins = [process.env.FRONTEND_URL, process.env.DEV_URL].filter(
+  Boolean,
+) as string[];
 
 const corsOptions: CorsOptions = {
   origin: (
     origin: string | undefined,
-    callback: (err: Error | null, allow?: boolean) => void
+    callback: (err: Error | null, allow?: boolean) => void,
   ) => {
     if (process.env.NODE_ENV === "development") {
       callback(null, true);
-    } 
-    else if (!origin || allowedOrigins.includes(origin)) {
+    } else if (!origin || allowedOrigins.includes(origin)) {
       callback(null, true);
     } else {
       callback(new Error("Not allowed by CORS"));
@@ -35,52 +37,34 @@ const corsOptions: CorsOptions = {
   allowedHeaders: ["Content-Type", "Authorization"],
 };
 
-const apiLimiter = rateLimit({
-  windowMs: 15 * 60 * 1000,
-  max: 100,
-  message: {
-    success: false,
-    message: "Too many requests, please try again later."
-  },
-  standardHeaders: true,
-  legacyHeaders: false
-});
-
-const authLimiter = rateLimit({
-  windowMs: 10 * 60 * 1000, 
-  max: 5, 
-  message: {
-    success: false,
-    message: "Too many auth attempts. Try again later."
-  }
-});
-
 app.use(cors(corsOptions));
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-app.use('/api', apiLimiter);
+app.use("/api", redisRateLimiter);
 
-app.use('/api/v1/auth', authLimiter, authRoutes);
-app.use('/api/v1/user', userRoutes);
-app.use('/api/v1/book', bookRoutes);
-app.use('/api/v1/transaction', transactionRoutes);
+app.use("/api/v1/auth", redisAuthLimiter, authRoutes);
+app.use("/api/v1/user", userRoutes);
+app.use("/api/v1/book", bookRoutes);
+app.use("/api/v1/transaction", transactionRoutes);
 
-app.get('/', (req: Request, res: Response) => {
-  res.send('RBAC for Library!')
-})
+app.get("/", (req: Request, res: Response) => {
+  res.send("RBAC for Library!");
+});
 
 async function startServer() {
   try {
-    const res = await pool.query('SELECT NOW()');
-    console.log('PostgreSQL connected:', res.rows[0]);
+    const res = await pool.query("SELECT NOW()");
+    console.log("PostgreSQL connected:", res.rows[0]);
+
+    await connectRedis();
 
     app.listen(port, () => {
       console.log(`Server listening on port ${port}`);
     });
   } catch (err) {
-    console.error('Failed to connect to PostgreSQL:', err);
+    console.error("Failed to connect to PostgreSQL:", err);
     process.exit(1);
   }
 }
