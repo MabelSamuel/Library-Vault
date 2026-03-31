@@ -1,92 +1,111 @@
-📚 LibraryVault API
+#  📚 LibraryVault API
 
 LibraryVault API is a secure and scalable RESTful backend for managing library resources. It provides full CRUD functionality with role-based access control (RBAC), making it ideal for building modern library management systems with structured permissions and resource organization.
 
-🚀 About
+## About
 
 LibraryVault is designed to simplify how libraries manage:
 
-📖 Books & resources
-👥 Users (students, librarians, admins)
-🔐 Authentication & authorization
-🛡️ Permissions via roles (RBAC)
+- Books & resources
+- Users (students, librarians, admins)
+- Authentication & authorization
+- Permissions via roles (RBAC)
 
 Whether you're building a school system, digital archive, or enterprise library platform, LibraryVault provides a solid backend foundation.
 
-❓ Why LibraryVault?
+## Why LibraryVault?
 
-When building library systems, managing authentication, permissions, and structured resources can get complex quickly.
+When building a library management UI, developers often run into a common problem — no ready-to-use backend with structured library data and authentication.
 
-LibraryVault solves this by:
+Most times, you either:
 
-Providing secure authentication flows (JWT + refresh tokens)
-Enforcing role-based access control
-Offering clean REST endpoints for CRUD operations
-Supporting scalable and maintainable architecture
-🌐 Base URL
-{{DEV_BASE_URL}}
+- Hardcode JSON files
+- Use random mock data
+- Or spend time building a backend before even testing your UI
 
-Example:
+LibraryVault solves this.
 
+It provides a ready-to-use API that lets you:
+
+- Work with realistic library data models (books, users, roles)
+- Test authentication flows (login, register, refresh tokens)
+- Simulate role-based access control (RBAC) in your UI
+- Build and test full CRUD interfaces without setting up a backend
+- Prototype faster with safe, non-critical data
+
+## Base URL
+
+```bash
 http://localhost:8000/api/v1
-🔐 Authentication
+```
+
+## Authentication
 
 LibraryVault uses JWT authentication with refresh tokens.
 
-Register
+# Register
 
-POST /auth/register
+POST `/auth/register`
 
+```
 {
   "username": "mapleberry",
   "email": "mapleberry@example.com",
-  "password": "StrongPassword123!"
+  "password": "password"
 }
-Login
+```
+# Login
 
-POST /auth/login
-
+POST `/auth/login`
+```
 {
   "identifier": "mapleberry@example.com",
   "password": "StrongPassword123!"
 }
-
+```
 Response:
-
+```
 {
   "accessToken": "your-access-token",
   "refreshToken": "your-refresh-token"
 }
-Logout
+```
+# Logout
 
-POST /auth/logout
+POST `/auth/logout`
 
 Invalidates the current session.
 
-Refresh Token
+# Refresh Token
 
-POST /auth/refresh
-
+POST `/auth/refresh`
+```
 {
   "refreshToken": "your-refresh-token"
 }
-Password Reset
+```
 
-POST /auth/password-reset
+# Password Reset
 
+POST `/auth/password-reset`
+```
 {
   "email": "mabel@example.com"
 }
-📚 Resources
+```
+
+# Resources
 
 LibraryVault is built around key library entities:
 
-Books
-Users
-Roles & Permissions
-Borrowing / Transactions (optional extension)
-📖 Books
+- Books
+- Users
+- Roles & Permissions
+- Borrowing / Transactions (optional extension)
+  
+# Books
 Fields
+```
 {
   "id": "number",
   "title": "string",
@@ -97,16 +116,22 @@ Fields
   "availableCopies": "number",
   "createdAt": "date"
 }
+```
 Get All Books
-fetch("{{DEV_BASE_URL}}/books")
+```
+fetch("http://localhost:8000/api/v1/books")
   .then(res => res.json())
   .then(data => console.log(data));
+```
 Get Single Book
-fetch("{{DEV_BASE_URL}}/books/1")
+```
+fetch("http://localhost:8000/api/v1/books/1")
   .then(res => res.json())
   .then(data => console.log(data));
+```
 Add New Book
-fetch("{{DEV_BASE_URL}}/books", {
+```
+fetch("http://localhost:8000/api/v1/books", {
   method: "POST",
   headers: {
     "Authorization": "Bearer YOUR_TOKEN",
@@ -121,8 +146,10 @@ fetch("{{DEV_BASE_URL}}/books", {
     availableCopies: 5
   })
 });
+```
 Update Book
-fetch("{{DEV_BASE_URL}}/books/1", {
+```
+fetch("http://localhost:8000/api/v1/books/1", {
   method: "PUT",
   headers: {
     "Authorization": "Bearer YOUR_TOKEN"
@@ -131,15 +158,20 @@ fetch("{{DEV_BASE_URL}}/books/1", {
     title: "Updated Title"
   })
 });
+```
 Delete Book
-fetch("{{DEV_BASE_URL}}/books/1", {
+```
+fetch("http://localhost:8000/api/v1/books/1", {
   method: "DELETE",
   headers: {
     "Authorization": "Bearer YOUR_TOKEN"
   }
 });
-👥 Users
+```
+
+# Users
 Fields
+```
 {
   "id": "number",
   "username": "string",
@@ -147,53 +179,74 @@ Fields
   "role": "string",
   "createdAt": "date"
 }
+```
 Get All Users
+```
 GET /users
+```
 Get User by ID
+```
 GET /users/:id
+```
 Assign Role (Admin Only)
+```
 PATCH /users/:id/role
-🛡️ Roles & Permissions (RBAC)
+```
+
+# Roles & Permissions (RBAC)
 
 LibraryVault enforces access control using roles such as:
 
-Admin → Full access
-Librarian → Manage books & users
-Member → View & borrow books
+- Admin → Full access
+- Librarian → Manage books & users
+- Member → View & borrow books
 
 Each endpoint is protected based on role permissions.
 
-🔎 Query Options
+# Query Options
 
 You can filter and sort results using query params:
-
+```
 /books?limit=10
 /books?sort=desc
 /books?category=fiction
-🧪 Example Usage
+```
+Example Usage
+```
 // Get books with limit
 fetch("{{DEV_BASE_URL}}/books?limit=5")
   .then(res => res.json())
   .then(data => console.log(data));
-📦 Error Handling
+```
+
+# Error Handling
 
 Typical error response:
-
+```
 {
   "status": "error",
   "message": "Unauthorized access"
 }
-🔮 Roadmap
-✅ Pagination support
-🔄 Borrow/return system
-📊 Analytics dashboard
-🌍 Multi-library support
-📦 GraphQL support
+```
+# Roadmap
+
+- Pagination support
+- Borrow/return system
+- Analytics dashboard
+- Multi-library support
+- GraphQL support
+- 
 🧑‍💻 Tech Stack
-Backend: Node.js / Django / etc. (customize this)
-Database: PostgreSQL / MongoDB (customize)
+Backend: Node.js / Express 
+Database: PostgreSQL
 Auth: JWT + Refresh Tokens
-🤝 Contributing
+
+# Contributing
+Contributions are welcome! Feel free to fork the repo and submit a pull request.
+
+# License
+
+MIT License
 
 Contributions are welcome! Feel free to fork the repo and submit a PR.
 
