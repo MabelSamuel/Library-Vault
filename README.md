@@ -247,9 +247,3 @@ Contributions are welcome! Feel free to fork the repo and submit a pull request.
 # License
 
 MIT License
-
-Contributions are welcome! Feel free to fork the repo and submit a PR.
-
-📄 License
-
-MIT License
