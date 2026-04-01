@@ -13,6 +13,13 @@ LibraryVault is designed to simplify how libraries manage:
 
 Whether you're building a school system, digital archive, or enterprise library platform, LibraryVault provides a solid backend foundation.
 
+## Documentation
+
+You can explore the full API documentation, endpoints, and usage examples here:
+
+[LibraryVault Doc](https://library-vault-doc.vercel.app/)
+
+
 ## Why LibraryVault?
 
 When building a library management UI, developers often run into a common problem — no ready-to-use backend with structured library data and authentication.
