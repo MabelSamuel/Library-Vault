@@ -50,7 +50,7 @@ http://localhost:8000/api/v1
 
 LibraryVault uses JWT authentication with refresh tokens.
 
-# Register
+## Register
 
 POST `/auth/register`
 
@@ -61,7 +61,7 @@ POST `/auth/register`
   "password": "password"
 }
 ```
-# Login
+## Login
 
 POST `/auth/login`
 ```
@@ -77,13 +77,13 @@ Response:
   "refreshToken": "your-refresh-token"
 }
 ```
-# Logout
+## Logout
 
 POST `/auth/logout`
 
 Invalidates the current session.
 
-# Refresh Token
+## Refresh Token
 
 POST `/auth/refresh`
 ```
@@ -92,7 +92,7 @@ POST `/auth/refresh`
 }
 ```
 
-# Password Reset
+## Password Reset
 
 POST `/auth/password-reset`
 ```
@@ -110,7 +110,7 @@ LibraryVault is built around key library entities:
 - Roles & Permissions
 - Borrowing / Transactions (optional extension)
   
-# Books
+## Books
 Fields
 ```
 {
@@ -176,7 +176,7 @@ fetch("http://localhost:8000/api/v1/books/1", {
 });
 ```
 
-# Users
+## Users
 Fields
 ```
 {
@@ -210,7 +210,7 @@ LibraryVault enforces access control using roles such as:
 
 Each endpoint is protected based on role permissions.
 
-# Query Options
+## Query Options
 
 You can filter and sort results using query params:
 ```
@@ -226,7 +226,7 @@ fetch("{{DEV_BASE_URL}}/books?limit=5")
   .then(data => console.log(data));
 ```
 
-# Error Handling
+## Error Handling
 
 Typical error response:
 ```
@@ -242,7 +242,7 @@ Typical error response:
 - Analytics dashboard
 - Multi-library support
 - GraphQL support
-- 
+  
 🧑‍💻 Tech Stack
 Backend: Node.js / Express 
 Database: PostgreSQL
