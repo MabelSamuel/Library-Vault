@@ -6,8 +6,10 @@ import {
   createBook,
   updateBook,
   deleteBook,
+  updateBookImage,
 } from "../controllers/book.controller";
 import { cache } from "../middlewares/cache";
+import { upload } from "../middlewares/upload";
 
 const router = express.Router();
 
@@ -17,19 +19,27 @@ router.post(
   "/",
   protect,
   authorize({ roles: ["librarian", "admin", "super_admin"] }),
-  createBook
+  upload.single("image"),
+  createBook,
 );
 router.put(
   "/:id",
   protect,
   authorize({ roles: ["librarian", "admin", "super_admin"] }),
-  updateBook
+  updateBook,
+);
+router.put(
+  "/:id/image",
+  protect,
+  authorize({ roles: ["librarian", "admin", "super_admin"] }),
+  upload.single("image"),
+  updateBookImage,
 );
 router.delete(
   "/:id",
   protect,
   authorize({ roles: ["admin", "super_admin"] }),
-  deleteBook
+  deleteBook,
 );
 
 export default router;

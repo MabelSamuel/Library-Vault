@@ -10,6 +10,14 @@ CREATE TABLE book (
   updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
+CREATE TABLE category (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  name VARCHAR(100) UNIQUE NOT NULL
+);
+
+ALTER TABLE book
+ADD COLUMN category_id UUID REFERENCES category(id);
+
 CREATE TABLE book_image (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   book_id UUID NOT NULL REFERENCES book(id) ON DELETE CASCADE,
