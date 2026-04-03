@@ -14,7 +14,7 @@ import { upload } from "../middlewares/upload";
 const router = express.Router();
 
 router.get("/", protect, cache(120), getAllBooks);
-router.get("/:id", protect, getBookById);
+router.get("/:id", protect, cache(120), getBookById);
 router.post(
   "/",
   protect,
