@@ -1,7 +1,7 @@
 import express from "express";
 import type { Request, Response } from "express";
 import dotenv from "dotenv";
-import pool from "../src/db";
+import pool from "./db";
 import cors from "cors";
 import type { CorsOptions } from "cors";
 import authRoutes from "./routes/auth.route";
