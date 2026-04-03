@@ -3,6 +3,7 @@ import pool from "../db";
 import logger from "../utils/error_logger";
 import { extractPublicId } from "../utils/cloudinary";
 import cloudinary from "../config/cloudinary";
+import { clearCache } from "../utils/cache_invalidation";
 
 export const getAllBooks = async (req: Request, res: Response) => {
   try {
@@ -153,14 +154,25 @@ export const createBook = async (req: Request, res: Response) => {
       [title, author, isbn, quantity, category_id],
     );
     const book = result.rows[0];
+
+    let imageUrl: string | null = null;
+
     if (req.file) {
-      await pool.query(
+      const imgResult =await pool.query(
         `INSERT INTO book_image(book_id, image_url, is_cover)
-         VALUES($1, $2, $3)`,
+         VALUES($1, $2, $3)
+         RETURNING image_url`,
         [book.id, req.file.path, true],
       );
+
+      imageUrl = imgResult.rows[0].image_url;
     }
-    res.status(201).json(book);
+    await clearCache("cache:/api/v1/book*");
+
+    res.status(201).json({
+      ...book,
+      image_url: imageUrl,
+    });
   } catch (err) {
     if (err instanceof Error) {
       console.error(err.message);
@@ -195,6 +207,7 @@ export const updateBook = async (req: Request, res: Response) => {
     if (!result.rows.length)
       return res.status(404).json({ message: "Book not found" });
 
+    await clearCache("cache:/api/v1/book*");
     res.json(result.rows[0]);
   } catch (err) {
     if (err instanceof Error) {
@@ -221,6 +234,9 @@ export const deleteBook = async (req: Request, res: Response) => {
       await cloudinary.uploader.destroy(publicId);
     }
     await pool.query("DELETE FROM book WHERE id=$1", [id]);
+
+    await clearCache("cache:/api/v1/book*");
+
     res.json({ message: "Book deleted successfully" });
   } catch (err) {
     if (err instanceof Error) {
@@ -265,6 +281,8 @@ export const updateBookImage = async (req: Request, res: Response) => {
        VALUES ($1, $2, true)`,
       [id, req.file.path],
     );
+
+    await clearCache("cache:/api/v1/book*");
 
     res.json({ message: "Book image updated successfully" });
   } catch (err) {
