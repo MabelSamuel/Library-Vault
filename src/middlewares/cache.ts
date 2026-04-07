@@ -1,7 +1,6 @@
 import { Request, Response, NextFunction } from "express";
 import redisClient from "../config/redis";
 import crypto from "crypto";
-import { ParsedQs } from "qs";
 
 export const cache = (ttl: number) => {
   return async (req: Request, res: Response, next: NextFunction) => {
